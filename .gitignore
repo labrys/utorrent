@@ -1,0 +1,16 @@
+*.cfg
+!/setup.cfg
+!.bumpversion.cfg
+*.cfg.old
+*.py[cod]
+*.log
+*.pid
+*.db
+*.dbm
+/userscripts/
+/logs/
+/.idea/
+/venv/
+*.dist-info
+*.egg-info
+/.vscode

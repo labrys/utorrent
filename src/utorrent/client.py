@@ -13,9 +13,9 @@ from urllib.request import (
 from .upload import MultiPartForm
 
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
 class UTorrentClient:

@@ -1,34 +1,24 @@
-# coding=utf8
-
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
-
 import re
-
-from six import StringIO, iteritems
-from six.moves.http_cookiejar import CookieJar
-from six.moves.urllib.request import (
+from http.cookiejar import CookieJar
+from io import StringIO
+from urllib.parse import urlencode, urljoin
+from urllib.request import (
     HTTPBasicAuthHandler,
     HTTPCookieProcessor,
     Request,
     build_opener,
     install_opener,
 )
-from six.moves.urllib_parse import urlencode, urljoin
 
 from .upload import MultiPartForm
 
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
-class UTorrentClient(object):
+class UTorrentClient:
 
     def __init__(self, base_url, username, password):
         self.base_url = base_url
@@ -38,13 +28,16 @@ class UTorrentClient(object):
         self.token = self._get_token()
         # TODO refresh token, when necessary
 
-    def _make_opener(self, realm, base_url, username, password):
+    @staticmethod
+    def _make_opener(realm, base_url, username, password):
         """HTTP Basic Auth and cookie support for token verification."""
         auth_handler = HTTPBasicAuthHandler()
-        auth_handler.add_password(realm=realm,
-                                  uri=base_url,
-                                  user=username,
-                                  passwd=password)
+        auth_handler.add_password(
+            realm=realm,
+            uri=base_url,
+            user=username,
+            passwd=password,
+        )
         opener = build_opener(auth_handler)
         install_opener(opener)
 
@@ -101,7 +94,7 @@ class UTorrentClient(object):
 
     def setprops(self, cur_hash, **kvpairs):
         params = [('action', 'setprops'), ('hash', cur_hash)]
-        for k, v in iteritems(kvpairs):
+        for k, v in kvpairs.items():
             params.append(('s', k))
             params.append(('v', v))
 
@@ -119,11 +112,11 @@ class UTorrentClient(object):
 
         form = MultiPartForm()
         if filepath is not None:
-            file_handler = open(filepath, 'rb')
+            with open(filepath, 'rb') as file_handler:
+                form.add_file('torrent_file', filename.encode('utf-8'), file_handler)
         else:
-            file_handler = StringIO(data)
-
-        form.add_file('torrent_file', filename.encode('utf-8'), file_handler)
+            with StringIO(data) as file_handler:
+                form.add_file('torrent_file', filename.encode('utf-8'), file_handler)
 
         return self._action(params, str(form), form.get_content_type())
 
@@ -150,7 +143,7 @@ class UTorrentClient(object):
 
         if body:
             request.data = body
-            request.add_header('Content-length', len(body))
+            request.add_header('Content-length', str(len(body)))
         if content_type:
             request.add_header('Content-type', content_type)
 

@@ -15,3 +15,6 @@
 *.egg-info
 /.vscode
 .coverage
+.mypy_cache/
+/build/
+/htmlcov/

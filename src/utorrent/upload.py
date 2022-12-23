@@ -1,34 +1,26 @@
-# coding=utf-8
 # code copied from http://www.doughellmann.com/PyMOTW/urllib2/
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
 
 import itertools
 import mimetypes
+# pylint: disable-next=import-private-name
 from email.generator import _make_boundary as choose_boundary
 
 
-class MultiPartForm(object):
+class MultiPartForm:
     """Accumulate the data to be used when posting a form."""
 
     def __init__(self):
         self.form_fields = []
         self.files = []
         self.boundary = choose_boundary()
-        return
 
     def get_content_type(self):
-        return 'multipart/form-data; boundary=%s' % self.boundary
+        return f'multipart/form-data; boundary={self.boundary}'
 
     def add_field(self, name, value):
         """Add a simple field to the form data."""
         self.form_fields.append((name, value))
-        return
 
     def add_file(self, fieldname, filename, file_handle, mimetype=None):
         """Add a file to be uploaded."""
@@ -36,7 +28,6 @@ class MultiPartForm(object):
         if mimetype is None:
             mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
         self.files.append((fieldname, filename, mimetype, body))
-        return
 
     def __str__(self):
         """Return a string representing the form data, including attached files."""
@@ -49,22 +40,24 @@ class MultiPartForm(object):
 
         # Add the form fields
         parts.extend(
-            [part_boundary,
-             'Content-Disposition: form-data; name="%s"' % name,
-             '',
-             value,
-             ]
+            [
+                part_boundary,
+                f'Content-Disposition: form-data; name="{name}"',
+                '',
+                value,
+            ]
             for name, value in self.form_fields
         )
 
         # Add the files to upload
         parts.extend(
-            [part_boundary,
-             'Content-Disposition: file; name="%s"; filename="%s"' % (field_name, filename),
-             'Content-Type: %s' % content_type,
-             '',
-             body,
-             ]
+            [
+                part_boundary,
+                f'Content-Disposition: file; name="{field_name}"; filename="{filename}"',
+                f'Content-Type: {content_type}',
+                '',
+                body,
+            ]
             for field_name, filename, content_type, body in self.files
         )
 

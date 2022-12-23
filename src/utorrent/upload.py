@@ -4,7 +4,7 @@
 import itertools
 import mimetypes
 # pylint: disable-next=import-private-name
-from email.generator import _make_boundary as choose_boundary
+from email.generator import _make_boundary as choose_boundary  # noqa
 
 
 class MultiPartForm:
